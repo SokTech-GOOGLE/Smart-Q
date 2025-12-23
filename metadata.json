@@ -1,0 +1,8 @@
+{
+  "name": "SmartQ - Ask Smart. Learn Faster.",
+  "description": "A smart Q&A platform where users ask questions, get instant AI-powered answers, and explore community knowledge. Built with Gemini AI for intelligent insights.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
