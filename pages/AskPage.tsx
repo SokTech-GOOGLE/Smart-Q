@@ -37,6 +37,7 @@ const AskPage: React.FC<AskPageProps> = ({ onAdd, user }) => {
       author: isAnonymous ? 'Anonymous' : (user?.username || 'Guest'),
       createdAt: Date.now(),
       likes: 0,
+      aiHelpfulCount: 0,
       aiAnswer: answer
     };
 

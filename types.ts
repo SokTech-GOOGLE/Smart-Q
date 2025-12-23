@@ -8,6 +8,7 @@ export interface Question {
   isAnonymous: boolean;
   createdAt: number;
   aiAnswer?: string;
+  aiHelpfulCount: number;
   likes: number;
 }
 

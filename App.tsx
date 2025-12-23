@@ -9,6 +9,7 @@ import CategoriesPage from './pages/CategoriesPage';
 import AIDialog from './pages/AIDialog';
 import QuestionDetail from './pages/QuestionDetail';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import { Question, User, Category } from './types';
 
@@ -35,6 +36,7 @@ const App: React.FC = () => {
           isAnonymous: false,
           createdAt: Date.now() - 86400000,
           likes: 24,
+          aiHelpfulCount: 15,
           aiAnswer: "Quantum entanglement is a physical phenomenon that occurs when a pair or group of particles is generated, interact, or share spatial proximity in a way such that the quantum state of each particle cannot be described independently of the state of the others, even when the particles are separated by a large distance."
         },
         {
@@ -46,6 +48,7 @@ const App: React.FC = () => {
           isAnonymous: false,
           createdAt: Date.now() - 43200000,
           likes: 12,
+          aiHelpfulCount: 8,
           aiAnswer: "Consistency is key. 1. Practice 15 minutes daily. 2. Immersion through movies/music. 3. Use SRS apps like Anki or Duolingo. 4. Speak aloud from day one."
         }
       ];
@@ -56,6 +59,24 @@ const App: React.FC = () => {
 
   const addQuestion = (newQ: Question) => {
     const updated = [newQ, ...questions];
+    setQuestions(updated);
+    localStorage.setItem('smartq_questions', JSON.stringify(updated));
+    
+    // Update user question count if logged in
+    if (currentUser && !newQ.isAnonymous) {
+      const updatedUser = { ...currentUser, questionsCount: currentUser.questionsCount + 1 };
+      setCurrentUser(updatedUser);
+      localStorage.setItem('smartq_user', JSON.stringify(updatedUser));
+    }
+  };
+
+  const handleAIHelpfulVote = (questionId: string) => {
+    const updated = questions.map(q => {
+      if (q.id === questionId) {
+        return { ...q, aiHelpfulCount: q.aiHelpfulCount + 1 };
+      }
+      return q;
+    });
     setQuestions(updated);
     localStorage.setItem('smartq_questions', JSON.stringify(updated));
   };
@@ -80,9 +101,10 @@ const App: React.FC = () => {
             <Route path="/ask" element={<AskPage onAdd={addQuestion} user={currentUser} />} />
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/ai" element={<AIDialog />} />
-            <Route path="/question/:id" element={<QuestionDetail questions={questions} />} />
+            <Route path="/question/:id" element={<QuestionDetail questions={questions} onVoteAI={handleAIHelpfulVote} />} />
             <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
-            <Route path="/profile" element={currentUser ? <ProfilePage user={currentUser} onLogout={handleLogout} /> : <Navigate to="/login" />} />
+            <Route path="/register" element={<RegisterPage onLogin={handleLogin} />} />
+            <Route path="/profile" element={currentUser ? <ProfilePage user={currentUser} questions={questions} onLogout={handleLogout} /> : <Navigate to="/login" />} />
           </Routes>
         </main>
         <Footer />

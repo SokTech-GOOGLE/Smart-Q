@@ -3,48 +3,41 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { User } from '../types';
 
-interface LoginPageProps {
+interface RegisterPageProps {
   onLogin: (u: User) => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+const RegisterPage: React.FC<RegisterPageProps> = ({ onLogin }) => {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    
+    const newUser = {
+      id: Math.random().toString(36).substr(2, 9),
+      username,
+      email,
+      password
+    };
 
-    // Mock local storage auth check
+    // Save to mock users list
     const users = JSON.parse(localStorage.getItem('smartq_mock_users') || '[]');
-    const user = users.find((u: any) => u.email === email && u.password === password);
+    users.push(newUser);
+    localStorage.setItem('smartq_mock_users', JSON.stringify(users));
 
-    if (user) {
-      const authUser: User = {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        avatar: `https://picsum.photos/seed/${user.username}/200`,
-        questionsCount: 0
-      };
-      onLogin(authUser);
-      navigate('/profile');
-    } else {
-      setError('Invalid email or password. Use "admin@test.com" / "password" for demo or register.');
-      // Fallback for easy testing
-      if (email === 'admin@test.com' && password === 'password') {
-        onLogin({
-          id: 'admin-id',
-          username: 'DemoUser',
-          email: 'admin@test.com',
-          avatar: `https://picsum.photos/seed/DemoUser/200`,
-          questionsCount: 2
-        });
-        navigate('/profile');
-      }
-    }
+    const authUser: User = {
+      id: newUser.id,
+      username: newUser.username,
+      email: newUser.email,
+      avatar: `https://picsum.photos/seed/${newUser.username}/200`,
+      questionsCount: 0
+    };
+
+    onLogin(authUser);
+    navigate('/profile');
   };
 
   return (
@@ -52,20 +45,24 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-3xl shadow-xl border border-slate-100">
         <div className="text-center">
           <div className="bg-blue-600 w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-white text-3xl mb-4 shadow-lg shadow-blue-200">
-            <i className="fa-solid fa-brain-circuit"></i>
+            <i className="fa-solid fa-user-plus"></i>
           </div>
-          <h2 className="text-3xl font-black text-slate-900">Welcome Back</h2>
-          <p className="mt-2 text-sm text-slate-500">Sign in to SmartQ to continue learning</p>
+          <h2 className="text-3xl font-black text-slate-900">Join SmartQ</h2>
+          <p className="mt-2 text-sm text-slate-500">Create an account to start your journey</p>
         </div>
-        
-        {error && (
-          <div className="bg-rose-50 border border-rose-100 text-rose-600 text-xs p-3 rounded-xl font-medium">
-            {error}
-          </div>
-        )}
-
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
+            <div>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 block">Username</label>
+              <input
+                type="text"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="appearance-none relative block w-full px-4 py-3 border border-slate-200 placeholder-slate-400 text-slate-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all sm:text-sm"
+                placeholder="TheScholar99"
+              />
+            </div>
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 block">Email Address</label>
               <input
@@ -90,30 +87,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input id="remember-me" type="checkbox" className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" />
-              <label htmlFor="remember-me" className="ml-2 block text-xs text-slate-500 font-medium">Remember me</label>
-            </div>
-            <div className="text-xs">
-              <a href="#" className="font-bold text-blue-600 hover:text-blue-500">Forgot password?</a>
-            </div>
-          </div>
-
           <div>
             <button
               type="submit"
               className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-sm font-black rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition-all transform active:scale-95 shadow-lg shadow-blue-100"
             >
-              Sign In
+              Register Now
             </button>
           </div>
         </form>
         
         <div className="text-center mt-6">
           <p className="text-sm text-slate-500">
-            Don't have an account?{' '}
-            <Link to="/register" className="font-black text-blue-600 hover:underline">Register now</Link>
+            Already have an account?{' '}
+            <Link to="/login" className="font-black text-blue-600 hover:underline">Sign in</Link>
           </p>
         </div>
       </div>
@@ -121,4 +108,4 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

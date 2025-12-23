@@ -1,15 +1,17 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Question } from '../types';
 
 interface QuestionDetailProps {
   questions: Question[];
+  onVoteAI: (id: string) => void;
 }
 
-const QuestionDetail: React.FC<QuestionDetailProps> = ({ questions }) => {
+const QuestionDetail: React.FC<QuestionDetailProps> = ({ questions, onVoteAI }) => {
   const { id } = useParams<{ id: string }>();
   const question = questions.find(q => q.id === id);
+  const [hasVotedAI, setHasVotedAI] = useState(false);
 
   if (!question) {
     return (
@@ -19,6 +21,12 @@ const QuestionDetail: React.FC<QuestionDetailProps> = ({ questions }) => {
       </div>
     );
   }
+
+  const handleAIHelpful = () => {
+    if (hasVotedAI) return;
+    onVoteAI(question.id);
+    setHasVotedAI(true);
+  };
 
   return (
     <div className="bg-slate-50 min-h-screen py-10">
@@ -81,13 +89,26 @@ const QuestionDetail: React.FC<QuestionDetailProps> = ({ questions }) => {
                 <p key={i} className="mb-4 last:mb-0">{para}</p>
               ))}
             </div>
-            <div className="mt-6 flex items-center space-x-4 relative z-10">
-               <button className="text-xs font-bold text-blue-100 hover:text-white flex items-center">
-                 <i className="fa-solid fa-thumbs-up mr-2"></i> Good Answer
-               </button>
-               <button className="text-xs font-bold text-blue-100 hover:text-white flex items-center">
-                 <i className="fa-solid fa-thumbs-down mr-2"></i> Needs improvement
-               </button>
+            <div className="mt-6 flex items-center justify-between relative z-10">
+               <div className="flex items-center space-x-4">
+                 <button 
+                  onClick={handleAIHelpful}
+                  disabled={hasVotedAI}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center transition-all ${
+                    hasVotedAI 
+                      ? 'bg-emerald-500 text-white shadow-lg' 
+                      : 'bg-white/20 text-blue-100 hover:bg-white/30'
+                  }`}
+                 >
+                   <i className={`fa-solid ${hasVotedAI ? 'fa-check' : 'fa-thumbs-up'} mr-2`}></i> 
+                   {hasVotedAI ? 'Helpful!' : 'Helpful'}
+                   <span className="ml-2 bg-black/10 px-1.5 py-0.5 rounded-md">{question.aiHelpfulCount || 0}</span>
+                 </button>
+                 <button className="text-xs font-bold text-blue-100/50 hover:text-white flex items-center">
+                   <i className="fa-solid fa-thumbs-down mr-2"></i> Not what I needed
+                 </button>
+               </div>
+               <span className="text-[10px] text-blue-200 uppercase tracking-widest font-bold">AI Generated Answer</span>
             </div>
           </div>
         )}
